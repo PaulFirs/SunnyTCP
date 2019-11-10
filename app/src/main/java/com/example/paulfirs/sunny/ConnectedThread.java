@@ -2,7 +2,6 @@ package com.example.paulfirs.sunny;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import com.example.paulfirs.sunny.fragments.For_Fragments;
@@ -12,22 +11,17 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.fragments.For_Fragments.byteArrayToHex;
-import static com.example.paulfirs.sunny.WorkActivity.activity;
 
 public class ConnectedThread extends Thread {
     private String ip;
     private int port;
-    private InputStream input;
     private final static String TAG = "myLogs";
-    static Intent activity_Terminal;
-    Socket socket = null;
+    private Socket socket = null;
 
-    Context context;
 
-    static Timer timer;
+    private static Timer timer;
 
 
     // while this is true, the server will continue running
@@ -35,17 +29,17 @@ public class ConnectedThread extends Thread {
     // used to send messages
 
 
-    public ConnectedThread(Context context, String ip, String port) {
+    ConnectedThread(Context context, String ip, String port) {
+
         this.ip = ip;
         this.port = Integer.parseInt(port);
-        this.context = context;
     }
 
 
     /**
      * Sends the message entered by client to the server
      */
-    public void sendMessage(final byte[] buf) {
+    void sendMessage(final byte[] buf) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -85,7 +79,6 @@ public class ConnectedThread extends Thread {
             e.printStackTrace();
         }
 
-        activity.finish();
     }
 
     public void run() {
@@ -97,13 +90,10 @@ public class ConnectedThread extends Thread {
             //create a socket to make the connection with the server
             socket = new Socket(InetAddress.getByName(ip), port);
 
-            activity_Terminal = new Intent(context, WorkActivity.class);
-            context.startActivity(activity_Terminal);
-
             Log.d(TAG, "Запуск клиента");
             try {
 
-                input = socket.getInputStream();
+                InputStream input = socket.getInputStream();
                 //in this while the client listens for the messages sent by the server
                 while (mRun) {
                     byte[] buf = new byte[11];

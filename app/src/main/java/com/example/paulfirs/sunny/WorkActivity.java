@@ -2,6 +2,7 @@ package com.example.paulfirs.sunny;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -24,6 +25,7 @@ import com.example.paulfirs.sunny.fragments.Graphics;
 import com.example.paulfirs.sunny.fragments.Main;
 import com.example.paulfirs.sunny.fragments.Sensors;
 import com.example.paulfirs.sunny.fragments.Servo;
+import com.example.paulfirs.sunny.fragments.Settings;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -31,16 +33,18 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static com.example.paulfirs.sunny.MainActivity.MyThread;
 
 public class WorkActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private final static String TAG = "myLogs";
 
+//Настройки программы
 
+
+    public static final String APP_PREFERENCES = "mysettings";// имя файла настроек
+    public static final String APP_PREFERENCES_IP = "ip"; // название настройки
+    public static final String APP_PREFERENCES_PORT= "port"; // название настройки
+    public static SharedPreferences mSettings;//переменная для работы с файлом настройки
 
 
     public final static byte BUF_SIZE 		= 9;
@@ -76,7 +80,8 @@ public class WorkActivity extends AppCompatActivity
 
     private static Context context;
 
-    public static WorkActivity activity = null;
+
+    public static ConnectedThread MyThread = null;
 
     @SuppressLint("HandlerLeak")
     @Override
@@ -86,7 +91,7 @@ public class WorkActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        activity = this;
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -104,8 +109,24 @@ public class WorkActivity extends AppCompatActivity
         navigationView.setCheckedItem(R.id.nav_monitor);
         setTitle(getString(R.string.nav_Monitor));
 
-        //txByte(new byte[9]);
 
+
+        String ip = "";
+        String port = "";
+//инициализация переменной для работы с настройками программы
+        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        if (mSettings.contains(APP_PREFERENCES_IP)) {
+            // Получаем число из настроек
+            ip = mSettings.getString(APP_PREFERENCES_IP, "");
+            // Выводим на экран данные из настроек
+        }
+        if (mSettings.contains(APP_PREFERENCES_PORT)) {
+            // Получаем число из настроек
+            port = mSettings.getString(APP_PREFERENCES_PORT, "");
+            // Выводим на экран данные из настроек
+        }
+        MyThread = new ConnectedThread(this, ip, port);
+        MyThread.start();
 
         h = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -204,11 +225,9 @@ public class WorkActivity extends AppCompatActivity
             CreateFragment(Datas.class);
         } else if (id == R.id.nav_servo) {
             CreateFragment(Servo.class);
-        } /*else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }*/
+        }else if (id == R.id.nav_settings) {
+            CreateFragment(Settings.class);
+        }
 
         // Выделяем выбранный пункт меню в шторке
         item.setChecked(true);
@@ -259,19 +278,17 @@ public class WorkActivity extends AppCompatActivity
             // закрываем поток
             bw.close();
             Log.d(TAG, "Файл записан");
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (IOException e){
             e.printStackTrace();
         }
     }
 
     public static void txByte(byte[] tx_data){
         tx_data[BUF_SIZE-1] = For_Fragments.CRC8(tx_data);
-
-        if(!MainActivity.DEMO_VERSION) {
+        try {
             MyThread.sendMessage(tx_data);
         }
+        catch(NullPointerException e){Toast.makeText(getAppContext(), "Нет соединения", Toast.LENGTH_LONG).show();}
     }
 
     public static void notific_error(byte err) {

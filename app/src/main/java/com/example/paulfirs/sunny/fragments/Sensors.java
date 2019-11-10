@@ -1,6 +1,7 @@
 package com.example.paulfirs.sunny.fragments;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,9 +74,11 @@ public class Sensors extends Fragment  {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
+                    Looper.prepare();
                     final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
                     tx_data[0] = WorkActivity.GET_SENSORS;
                     WorkActivity.txByte(tx_data);
+                    Looper.loop();
                 }
             }, 0, 10000);
         }

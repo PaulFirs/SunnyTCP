@@ -34,12 +34,16 @@ public class For_Fragments {
         int aLen = 0;
         try {
             aLen = a.length;
-        }catch (NullPointerException e){}
+        }catch (NullPointerException ignored){}
         int bLen = b.length;
         byte[] c= new byte[aLen+bLen];
         if(aLen != 0)
             System.arraycopy(a, 0, c, 0, aLen);
         System.arraycopy(b, 0, c, aLen, bLen);
         return c;
+    }
+
+    public static void reconnect() {
+
     }
 }

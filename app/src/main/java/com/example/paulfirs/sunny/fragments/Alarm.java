@@ -193,7 +193,7 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
         else if(minutes < 10)
             str_alarm = hours + "0" + minutes + "00";
         else
-            str_alarm = String.valueOf(hours) + String.valueOf(minutes) + "00";
+            str_alarm = String.valueOf(hours) + minutes + "00";
 
         //Log.d(TAG, "***SEND data: " + str_alarm + "***");
         byte[] alarm_DS3231 = timeForDS3231(Integer.parseInt(str_alarm, 16));
@@ -232,10 +232,10 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
         got_Alarm.setText(normalTime(rx_data));
 
 
-        switch_chan.setChecked(((rx_data[5] & 0x01) == 0x01)? true: false);
-        switch_sound.setChecked(((rx_data[5] & 0x02) == 0x02)? true: false);
-        switch_curtains.setChecked(((rx_data[5] & 0x04) == 0x04)? true: false);
-        switch_window.setChecked(((rx_data[5] & 0x08) == 0x08)? true: false);
+        switch_chan.setChecked((rx_data[5] & 0x01) == 0x01);
+        switch_sound.setChecked((rx_data[5] & 0x02) == 0x02);
+        switch_curtains.setChecked((rx_data[5] & 0x04) == 0x04);
+        switch_window.setChecked((rx_data[5] & 0x08) == 0x08);
         got_Alarm.setText(normalTime(rx_data));
     }
 
