@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/delete_file"
+        android:orderInCategory="100"
+        android:title="@string/delete_file"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/delete_all_file"
+        android:orderInCategory="100"
+        android:title="@string/delete_all_file"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/choose_file"
+        android:orderInCategory="100"
+        android:title="@string/choose_file"
+        app:showAsAction="never" />
+</menu>

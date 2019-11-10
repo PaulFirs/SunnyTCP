@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+     <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_curtains"
+            android:icon="@drawable/curtains"
+            android:title="@string/nav_Curtains" />
+         <item
+             android:id="@+id/nav_sensors"
+             android:icon="@drawable/sensors"
+             android:title="@string/nav_Sensors" />
+         <item
+             android:id="@+id/nav_datafile"
+             android:icon="@drawable/datafile"
+             android:title="@string/nav_DataFile" />
+         <item
+             android:id="@+id/nav_servo"
+             android:icon="@drawable/servo"
+             android:title="@string/nav_Servo" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+
+            <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_monitor"
+            android:icon="@drawable/monitor"
+            android:title="@string/nav_Monitor" />
+         <item
+             android:id="@+id/nav_datas"
+             android:icon="@drawable/datas"
+             android:title="@string/nav_Datas" />
+            </group>
+        </menu>
+
+</item>
+</menu>

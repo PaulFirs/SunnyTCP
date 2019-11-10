@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Sunny</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Sunny Studio</string>
+    <string name="nav_header_subtitle">p.d.firsov@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="delete_file">Delete date</string>
+    <string name="delete_all_file">Delete all</string>
+    <string name="choose_file">Choose date</string>
+
+    <string name="nav_Monitor">Monitor</string>
+    <string name="nav_Curtains">Curtains</string>
+    <string name="nav_Sensors">Sensors</string>
+    <string name="nav_DataFile">DataFile</string>
+    <string name="nav_Datas">Datas</string>
+    <string name="nav_Servo">Servo</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string-array name="comands_list">
+        <item>Свет</item>
+        <item>Считать время</item>
+        <item>Записать время</item>
+        <item>Считать будильник</item>
+        <item>Записать будильник</item>
+        <item>Показания датчиков </item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_datas">Datas</string>
+</resources>
