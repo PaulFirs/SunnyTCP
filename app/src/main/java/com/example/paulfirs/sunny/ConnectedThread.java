@@ -18,7 +18,7 @@ public class ConnectedThread extends Thread {
     private String ip;
     private int port;
     private final static String TAG = "myLogs";
-    private Socket socket = null;
+    static Socket socket = null;
 
 
     private static Timer timer;
@@ -120,7 +120,7 @@ public class ConnectedThread extends Thread {
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
 
-                //socket.close();
+                socket.close();
 
                 Log.d(TAG, "Потеряно соединение");
 

@@ -25,7 +25,7 @@ public class Sensors extends Fragment  {
     static TextView input_Temp;
     static ProgressBar temp;
 
-    static Timer timer;
+    static Timer sensors_timer;
     static TextView got_CO2;
     static ProgressBar ppm;
 
@@ -69,16 +69,18 @@ public class Sensors extends Fragment  {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "Fragment_Sensors onResume");
-        if (timer == null) {
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
+        if (sensors_timer == null) {
+            sensors_timer = new Timer();
+            sensors_timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    Looper.prepare();
+                    if (Looper.myLooper() == null)
+                    {
+                        Looper.prepare();
+                    }
                     final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
                     tx_data[0] = WorkActivity.GET_SENSORS;
                     WorkActivity.txByte(tx_data);
-                    Looper.loop();
                 }
             }, 0, 10000);
         }
@@ -110,10 +112,9 @@ public class Sensors extends Fragment  {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (timer != null) {//сброс таймера по ответу
-            timer.cancel();
-            timer = null;
-            Log.d(TAG, "Ответ пришел");
+        if (sensors_timer != null) {//сброс таймера по ответу
+            sensors_timer.cancel();
+            sensors_timer = null;
         }
         Log.d(TAG, "Fragment_Sensors onDetach");
     }

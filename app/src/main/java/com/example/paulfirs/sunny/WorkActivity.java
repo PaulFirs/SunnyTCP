@@ -34,6 +34,8 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static com.example.paulfirs.sunny.ConnectedThread.socket;
+
 public class WorkActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private final static String TAG = "myLogs";
@@ -285,8 +287,10 @@ public class WorkActivity extends AppCompatActivity
 
     public static void txByte(byte[] tx_data){
         tx_data[BUF_SIZE-1] = For_Fragments.CRC8(tx_data);
+
         try {
-            MyThread.sendMessage(tx_data);
+            if(socket.isConnected())
+                MyThread.sendMessage(tx_data);
         }
         catch(NullPointerException e){Toast.makeText(getAppContext(), "Нет соединения", Toast.LENGTH_LONG).show();}
     }
