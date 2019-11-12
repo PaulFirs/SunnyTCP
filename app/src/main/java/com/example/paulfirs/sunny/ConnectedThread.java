@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.fragments.For_Fragments.byteArrayToHex;
 
@@ -34,7 +35,6 @@ public class ConnectedThread extends Thread {
         this.ip = ip;
         this.port = Integer.parseInt(port);
     }
-
 
     /**
      * Sends the message entered by client to the server
@@ -78,56 +78,58 @@ public class ConnectedThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "Отключено");
 
     }
 
     public void run() {
+        while (true) {
+            mRun = true;
 
-        mRun = true;
-
-        try {
-            timer = null;
-            //create a socket to make the connection with the server
-            socket = new Socket(InetAddress.getByName(ip), port);
-
-            Log.d(TAG, "Запуск клиента");
             try {
+                timer = null;
+                //create a socket to make the connection with the server
 
-                InputStream input = socket.getInputStream();
-                //in this while the client listens for the messages sent by the server
-                while (mRun) {
-                    byte[] buf = new byte[11];
-                    int readBytes = input.read(buf);
-                    if(readBytes == -1) {
-                        Log.d(TAG, "Закрытие сокета");
-                        Log.d(TAG, "readBytes = " + readBytes);
-                        stopClient();
-                    }
-                    else {
-                        Log.d(TAG, "\tRX data: " + byteArrayToHex(buf) + ": " + "readBytes = " + readBytes);
-                        if (timer != null) {//сброс таймера по ответу
-                            timer.cancel();
-                            timer = null;
-                            Log.d(TAG, "Ответ пришел");
+
+                Log.d(TAG, "Подключение...");
+                socket = new Socket(InetAddress.getByName(ip), port);
+
+                Log.d(TAG, "Подключено");
+                try {
+
+                    InputStream input = socket.getInputStream();
+                    //in this while the client listens for the messages sent by the server
+                    while (mRun) {
+                        byte[] buf = new byte[11];
+                        int readBytes = input.read(buf);
+                        if (readBytes == -1) {
+                            Log.d(TAG, "Закрытие сокета");
+                            Log.d(TAG, "readBytes = " + readBytes);
+                            stopClient();
+                        } else {
+                            Log.d(TAG, "\tRX data: " + byteArrayToHex(buf) + ": " + "readBytes = " + readBytes);
+                            if (timer != null) {//сброс таймера по ответу
+                                timer.cancel();
+                                timer = null;
+                                Log.d(TAG, "Ответ пришел");
+                            }
+                            WorkActivity.h.obtainMessage(1, readBytes, -1, buf).sendToTarget(); /* Отправляем в очередь сообщенийHandler*/
                         }
-                        WorkActivity.h.obtainMessage(1, readBytes, -1, buf).sendToTarget(); /* Отправляем в очередь сообщенийHandler*/
                     }
+
+                } catch (IOException e) {
+                    Log.d(TAG, e.toString());
+                    Log.e("TCP", "S: Error", e);
+                } finally {
+                    //the socket must be closed. It is not possible to reconnect to this socket
+                    // after it is closed, which means a new socket instance has to be created.
+                    if (mRun)
+                        stopClient();
                 }
 
             } catch (IOException e) {
-                Log.e("TCP", "S: Error", e);
-            } finally {
-                //the socket must be closed. It is not possible to reconnect to this socket
-                // after it is closed, which means a new socket instance has to be created.
-
-                socket.close();
-
-                Log.d(TAG, "Потеряно соединение");
-
+                Log.d(TAG, e.toString());
             }
-
-        } catch (IOException e) {
-            Log.e("TCP", "C: Error", e);
         }
     }
 }
