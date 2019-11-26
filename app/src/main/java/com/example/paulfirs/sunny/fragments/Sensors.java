@@ -1,7 +1,6 @@
 package com.example.paulfirs.sunny.fragments;
 
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,9 +12,8 @@ import android.widget.TextView;
 import com.example.paulfirs.sunny.R;
 import com.example.paulfirs.sunny.WorkActivity;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
+import static com.example.paulfirs.sunny.WorkActivity.GET_SENSORS;
+import static com.example.paulfirs.sunny.WorkActivity.PERIODIC_COMMAND;
 
 
 public class Sensors extends Fragment  {
@@ -25,7 +23,6 @@ public class Sensors extends Fragment  {
     static TextView input_Temp;
     static ProgressBar temp;
 
-    static Timer sensors_timer;
     static TextView got_CO2;
     static ProgressBar ppm;
 
@@ -70,24 +67,9 @@ public class Sensors extends Fragment  {
         super.onResume();
         Log.d(TAG, "Fragment_Sensors onResume");
         final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
-        tx_data[1] = WorkActivity.GET_SENSORS;
+        tx_data[1] = GET_SENSORS;
         WorkActivity.txByte(tx_data);
-
-//        if (sensors_timer == null) {
-//            sensors_timer = new Timer();
-//            sensors_timer.schedule(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    if (Looper.myLooper() == null)
-//                    {
-//                        Looper.prepare();
-//                    }
-////                    final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
-////                    tx_data[1] = WorkActivity.GET_SENSORS;
-////                    WorkActivity.txByte(tx_data);
-//                }
-//            }, 0, 10000);
-//        }
+        PERIODIC_COMMAND = GET_SENSORS;
     }
 
     @Override
@@ -116,10 +98,8 @@ public class Sensors extends Fragment  {
     @Override
     public void onDetach() {
         super.onDetach();
-//        if (sensors_timer != null) {//сброс таймера по ответу
-//            sensors_timer.cancel();
-//            sensors_timer = null;
-//        }
+
+        PERIODIC_COMMAND = (byte) 0xff;
         Log.d(TAG, "Fragment_Sensors onDetach");
     }
 

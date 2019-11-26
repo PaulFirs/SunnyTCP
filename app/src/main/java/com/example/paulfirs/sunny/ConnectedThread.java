@@ -17,6 +17,7 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.paulfirs.sunny.WorkActivity.PERIODIC_COMMAND;
 import static com.example.paulfirs.sunny.WorkActivity.getAppContext;
 import static com.example.paulfirs.sunny.fragments.For_Fragments.byteArrayToHex;
 
@@ -154,7 +155,7 @@ public class ConnectedThread extends Thread {
                 Log.d(TAG, "Отправка поддерживающего сообщения");
 
                 byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
-                tx_data[1] = (byte) 0xFF;
+                tx_data[1] = PERIODIC_COMMAND;
                 sendMessage(tx_data);
             }
         }, 15000);

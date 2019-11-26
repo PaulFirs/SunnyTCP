@@ -1,31 +1,14 @@
 package com.example.paulfirs.sunny;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.SyncStateContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,13 +29,10 @@ import com.example.paulfirs.sunny.fragments.Servo;
 import com.example.paulfirs.sunny.fragments.Settings;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.ConnectedThread.socket;
 
@@ -80,6 +60,7 @@ public class WorkActivity extends AppCompatActivity
     public final static byte SET_ALARM			= 0x04;
     public final static byte GET_SENSORS		= 0x05;
 
+    public static byte PERIODIC_COMMAND	= (byte) 0xff;
 
 
     public final static byte WRITE_SECTOR_SD    = 0x04;
