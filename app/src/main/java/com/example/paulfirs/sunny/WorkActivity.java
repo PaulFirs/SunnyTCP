@@ -1,13 +1,31 @@
 package com.example.paulfirs.sunny;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.SyncStateContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -33,6 +51,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.ConnectedThread.socket;
 
@@ -82,8 +102,8 @@ public class WorkActivity extends AppCompatActivity
 
     private static Context context;
 
-
     public static ConnectedThread MyThread = null;
+
 
     @SuppressLint("HandlerLeak")
     @Override
@@ -94,6 +114,13 @@ public class WorkActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
 
+        if (!isMyServiceRunning(ServiceConnect.class)) {
+            Log.d(TAG, "Запуск сервиса из активности");
+            //startService(new Intent(this, ServiceConnect.class));
+        } else {
+            Log.d(TAG, "Сервис уже существует");
+            //stopService(intentService);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -127,8 +154,9 @@ public class WorkActivity extends AppCompatActivity
             port = mSettings.getString(APP_PREFERENCES_PORT, "");
             // Выводим на экран данные из настроек
         }
-        MyThread = new ConnectedThread(this, ip, port);
+        MyThread = new ConnectedThread(ip, port);
         MyThread.start();
+
 
         h = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -136,29 +164,29 @@ public class WorkActivity extends AppCompatActivity
                 byte[] rx_data = (byte[]) msg.obj;		//массив принятых данных
 
                 try {
-                    if (rx_data[0] == ERROR)//Recived error
-                        notific_error(rx_data[1]);//notivication about error
+                    if (rx_data[1] == ERROR)//Recived error
+                        notific_error(rx_data[2]);//notivication about error
 
                     if (getTitle().toString().equals("Monitor"))//если пользователь в окне отладки, то выводить все что пришло
                         Main.getData(rx_data);//вывести на экран данные
                     else//если пользователь не в окне отладки
                         //if (rx_data[BUF_SIZE - 1] == For_Fragments.CRC8(rx_data)) { //проверка на целостность данных
 
-                            switch (rx_data[0]) {
+                            switch (rx_data[1]) {
                                 case GET_SENSORS:
-                                    int co2 = (((int) rx_data[2] * 256) + (rx_data[3] & 0xFF));
+                                    int co2 = (((int) rx_data[5] * 256) + (rx_data[6] & 0xFF));
                                     writeFile(new SimpleDateFormat("HH:mm:ss").format(new Date()) + "-" + co2, "CO2 " + new SimpleDateFormat("dd.MM.yyyy").format(new Date()));
-                                    writeFile(new SimpleDateFormat("HH:mm:ss").format(new Date()) + "-" + rx_data[1], "Temp " + new SimpleDateFormat("dd.MM.yyyy").format(new Date()));
+                                    writeFile(new SimpleDateFormat("HH:mm:ss").format(new Date()) + "-" + rx_data[2], "Temp " + new SimpleDateFormat("dd.MM.yyyy").format(new Date()));
                                     break;
                             }
 
                             switch (getTitle().toString()) {            //Определение фрагмента
 
                                 case "Curtains":
-                                    switch (rx_data[0]) {                                   //читаем первый принятый байт-команду
+                                    switch (rx_data[1]) {                                   //читаем первый принятый байт-команду
                                         case SET_TIME:
                                             byte[] get_time = new byte[WorkActivity.BUF_SIZE];
-                                            get_time[0] = WorkActivity.GET_TIME;
+                                            get_time[1] = WorkActivity.GET_TIME;
                                             WorkActivity.txByte(get_time);
                                             break;
 
@@ -169,7 +197,7 @@ public class WorkActivity extends AppCompatActivity
 
                                         case SET_ALARM:
                                             byte[] get_alarm = new byte[WorkActivity.BUF_SIZE];
-                                            get_alarm[0] = WorkActivity.GET_ALARM;
+                                            get_alarm[1] = WorkActivity.GET_ALARM;
                                             WorkActivity.txByte(get_alarm);
                                             break;
 
@@ -179,7 +207,7 @@ public class WorkActivity extends AppCompatActivity
                                     }
                                     break;
                                 case "Sensors":
-                                    switch (rx_data[0]) {
+                                    switch (rx_data[1]) {
                                         case GET_SENSORS:
                                             Sensors.getData(rx_data);
                                             break;
@@ -188,13 +216,28 @@ public class WorkActivity extends AppCompatActivity
                             }
                         //}
                 } catch (ArrayIndexOutOfBoundsException e) {}
+
             }
         };
     }
 
+
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy_Manual_control");
+        Log.d(TAG, "WorkActivity onDestroy");
         super.onDestroy();
     }
 
@@ -256,8 +299,12 @@ public class WorkActivity extends AppCompatActivity
 
     //Button in Main
     public void sendData(View v){
+
+        Log.d(TAG, "Notification");
         Main.sendData();
     }
+
+
 
     //Button in Alarm
     public void sendAlarm(View v) {
@@ -266,7 +313,7 @@ public class WorkActivity extends AppCompatActivity
 
     public void switch_on_off(View v) {
         byte[] tx_data = new byte[BUF_SIZE];
-        tx_data[0] = SWITCH_LIGHT;
+        tx_data[1] = SWITCH_LIGHT;
         txByte(tx_data);
     }
 
@@ -286,11 +333,12 @@ public class WorkActivity extends AppCompatActivity
     }
 
     public static void txByte(byte[] tx_data){
-        tx_data[BUF_SIZE-1] = For_Fragments.CRC8(tx_data);
+        tx_data[0] = For_Fragments.CRC8(tx_data);
 
         try {
-            if(socket.isConnected())
+            if(socket.isConnected()) {
                 MyThread.sendMessage(tx_data);
+            }
         }
         catch(NullPointerException e){Toast.makeText(getAppContext(), "Нет соединения", Toast.LENGTH_LONG).show();}
     }

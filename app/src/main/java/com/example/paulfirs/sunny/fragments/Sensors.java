@@ -69,21 +69,25 @@ public class Sensors extends Fragment  {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "Fragment_Sensors onResume");
-        if (sensors_timer == null) {
-            sensors_timer = new Timer();
-            sensors_timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (Looper.myLooper() == null)
-                    {
-                        Looper.prepare();
-                    }
-                    final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
-                    tx_data[0] = WorkActivity.GET_SENSORS;
-                    WorkActivity.txByte(tx_data);
-                }
-            }, 0, 10000);
-        }
+        final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
+        tx_data[1] = WorkActivity.GET_SENSORS;
+        WorkActivity.txByte(tx_data);
+
+//        if (sensors_timer == null) {
+//            sensors_timer = new Timer();
+//            sensors_timer.schedule(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    if (Looper.myLooper() == null)
+//                    {
+//                        Looper.prepare();
+//                    }
+////                    final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
+////                    tx_data[1] = WorkActivity.GET_SENSORS;
+////                    WorkActivity.txByte(tx_data);
+//                }
+//            }, 0, 10000);
+//        }
     }
 
     @Override
@@ -112,10 +116,10 @@ public class Sensors extends Fragment  {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (sensors_timer != null) {//сброс таймера по ответу
-            sensors_timer.cancel();
-            sensors_timer = null;
-        }
+//        if (sensors_timer != null) {//сброс таймера по ответу
+//            sensors_timer.cancel();
+//            sensors_timer = null;
+//        }
         Log.d(TAG, "Fragment_Sensors onDetach");
     }
 
@@ -123,10 +127,10 @@ public class Sensors extends Fragment  {
 
     public static void getData(byte[] rx_data) {
 
-        input_Temp.setText(rx_data[1] + "");
-        temp.setProgress((int)rx_data[1]);
+        input_Temp.setText(rx_data[2] + "");
+        temp.setProgress((int)rx_data[2]);
 
-        int co2 = (((int) rx_data[4] * 256) + (rx_data[5] & 0xFF));
+        int co2 = (((int) rx_data[5] * 256) + (rx_data[6] & 0xFF));
         got_CO2.setText(String.valueOf(co2));
         ppm.setProgress(co2);
     }

@@ -79,8 +79,6 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
 
     @Override
     public void onStart() {
-
-
         super.onStart();
         Log.d(TAG, "Alarm onStart");
     }
@@ -90,7 +88,7 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
         super.onResume();
         byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
 
-        tx_data[0] = WorkActivity.GET_TIME;//При включении фрагмента отправляется запрос на все данные
+        tx_data[1] = WorkActivity.GET_TIME;//При включении фрагмента отправляется запрос на все данные
         WorkActivity.txByte(tx_data);
 
         Log.d(TAG, "Alarm onResume");
@@ -129,7 +127,7 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
 
     public static String normalTime(byte[] badTime){
         String normal = "";
-        for(int i = 2; i!=0; i--) {
+        for(int i = 3; i!=1; i--) {
             byte full = badTime[i];
             byte high = (byte) ((full >> 4) & 0x0F);
             byte low = (byte) (full & 0x0F);
@@ -161,7 +159,7 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
         if(Objects.equals(time.substring(0, 5), timePhone.format(new Date()))){
             Log.d(TAG, "Время синхронизированно");
             startUpApp = true;
-            tx_data[0] = WorkActivity.GET_ALARM;
+            tx_data[1] = WorkActivity.GET_ALARM;
             WorkActivity.txByte(tx_data);
         }
         else{
@@ -170,10 +168,10 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
 
             int date = Integer.parseInt(dateToDS3231.format(new Date()), 16);
             byte[] time_DS3231 = timeForDS3231(date);
-            tx_data[0] = WorkActivity.SET_TIME;
-            tx_data[1] = time_DS3231[0];
-            tx_data[2] = time_DS3231[1];
-            tx_data[3] = time_DS3231[2];
+            tx_data[1] = WorkActivity.SET_TIME;
+            tx_data[2] = time_DS3231[0];
+            tx_data[3] = time_DS3231[1];
+            tx_data[4] = time_DS3231[2];
             WorkActivity.txByte(tx_data);
         }
 
@@ -197,16 +195,16 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
 
         //Log.d(TAG, "***SEND data: " + str_alarm + "***");
         byte[] alarm_DS3231 = timeForDS3231(Integer.parseInt(str_alarm, 16));
-        tx_data[0] = WorkActivity.SET_ALARM;
-        tx_data[1] = alarm_DS3231[0];
-        tx_data[2] = alarm_DS3231[1];
-        tx_data[3] = alarm_DS3231[2];
-        tx_data[4] = status_alarm;
+        tx_data[1] = WorkActivity.SET_ALARM;
+        tx_data[2] = alarm_DS3231[0];
+        tx_data[3] = alarm_DS3231[1];
+        tx_data[4] = alarm_DS3231[2];
+        tx_data[5] = status_alarm;
 
-        tx_data[5] = (switch_chan.isChecked())? (byte) (tx_data[5] | 0x01): tx_data[5];
-        tx_data[5] = (switch_sound.isChecked())?  (byte) (tx_data[5] | 0x02): tx_data[5];
-        tx_data[5] = (switch_curtains.isChecked())? (byte) (tx_data[5] | 0x04): tx_data[5];
-        tx_data[5] = (switch_window.isChecked())? (byte) (tx_data[5] | 0x08): tx_data[5];
+        tx_data[6] = (switch_chan.isChecked())? (byte) (tx_data[6] | 0x01): tx_data[6];
+        tx_data[6] = (switch_sound.isChecked())?  (byte) (tx_data[6] | 0x02): tx_data[6];
+        tx_data[6] = (switch_curtains.isChecked())? (byte) (tx_data[6] | 0x04): tx_data[6];
+        tx_data[6] = (switch_window.isChecked())? (byte) (tx_data[6] | 0x08): tx_data[6];
 
         WorkActivity.txByte(tx_data);
     }
@@ -224,7 +222,7 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
     }
 
     public static void data_alarm(byte[] rx_data){
-        if (rx_data[4] == 0x00)
+        if (rx_data[5] == 0x00)
             on_alarm.setChecked(false);
         else
             on_alarm.setChecked(true);
@@ -232,10 +230,10 @@ public class Alarm extends Fragment implements CompoundButton.OnCheckedChangeLis
         got_Alarm.setText(normalTime(rx_data));
 
 
-        switch_chan.setChecked((rx_data[5] & 0x01) == 0x01);
-        switch_sound.setChecked((rx_data[5] & 0x02) == 0x02);
-        switch_curtains.setChecked((rx_data[5] & 0x04) == 0x04);
-        switch_window.setChecked((rx_data[5] & 0x08) == 0x08);
+        switch_chan.setChecked((rx_data[6] & 0x01) == 0x01);
+        switch_sound.setChecked((rx_data[6] & 0x02) == 0x02);
+        switch_curtains.setChecked((rx_data[6] & 0x04) == 0x04);
+        switch_window.setChecked((rx_data[6] & 0x08) == 0x08);
         got_Alarm.setText(normalTime(rx_data));
     }
 

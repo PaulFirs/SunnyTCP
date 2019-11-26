@@ -8,5 +8,5 @@
     <color name="primary_text_material_dark">#000000</color>
     <color name="grad_start">#e06a20</color>
     <color name="grad_end">#FBAD3D</color>
-
+    <color name="transparent">#00000000</color>
 </resources>
