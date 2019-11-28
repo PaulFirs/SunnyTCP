@@ -1,5 +1,8 @@
 package com.example.paulfirs.sunny.fragments;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,6 +17,7 @@ import com.example.paulfirs.sunny.WorkActivity;
 
 import static com.example.paulfirs.sunny.WorkActivity.GET_SENSORS;
 import static com.example.paulfirs.sunny.WorkActivity.PERIODIC_COMMAND;
+import static com.example.paulfirs.sunny.WorkActivity.getAppContext;
 
 
 public class Sensors extends Fragment  {
@@ -25,7 +29,6 @@ public class Sensors extends Fragment  {
 
     static TextView got_CO2;
     static ProgressBar ppm;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,14 +42,40 @@ public class Sensors extends Fragment  {
         View rootView =
                 inflater.inflate(R.layout.sensors, container, false);
 
-
         input_Temp = rootView.findViewById(R.id.input_Temp);
         temp = rootView.findViewById(R.id.temp);
 
         got_CO2 = rootView.findViewById(R.id.input_CO2);
+        got_CO2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String[] mCatsName ={"2k", "5k", "abc"};
+
+                AlertDialog.Builder builder;
+
+                builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Выбираем кота"); // заголовок для диалога
+
+                builder.setItems(mCatsName, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item) {
+
+                        final byte[] tx_data = new byte[WorkActivity.BUF_SIZE];
+                        tx_data[1] = GET_SENSORS;
+                        tx_data[2] = (byte) (item + 1);
+                        WorkActivity.txByte(tx_data);
+                    }
+                });
+                builder.setCancelable(false);
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
         ppm = rootView.findViewById(R.id.ppm);
         return rootView;
     }
+
+
 
 
 
@@ -107,11 +136,14 @@ public class Sensors extends Fragment  {
 
     public static void getData(byte[] rx_data) {
 
-        input_Temp.setText(rx_data[2] + "");
-        temp.setProgress((int)rx_data[2]);
-
         int co2 = (((int) rx_data[5] * 256) + (rx_data[6] & 0xFF));
-        got_CO2.setText(String.valueOf(co2));
-        ppm.setProgress(co2);
+
+        if(co2 != 0) {
+            got_CO2.setText(String.valueOf(co2));
+            ppm.setProgress(co2);
+
+            input_Temp.setText(rx_data[2] + "");
+            temp.setProgress((int) rx_data[2]);
+        }
     }
 }

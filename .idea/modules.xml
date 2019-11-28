@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Jarvis_Friday.iml" filepath="$PROJECT_DIR$/Jarvis_Friday.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SunnyTCP.iml" filepath="$PROJECT_DIR$/SunnyTCP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/SunnyTCP-app.iml" filepath="$PROJECT_DIR$/app/SunnyTCP-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
