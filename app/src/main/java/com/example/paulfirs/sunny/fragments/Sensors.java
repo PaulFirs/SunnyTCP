@@ -54,7 +54,7 @@ public class Sensors extends Fragment  {
                 AlertDialog.Builder builder;
 
                 builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Выбираем кота"); // заголовок для диалога
+                builder.setTitle("Settings MH-Z19"); // заголовок для диалога
 
                 builder.setItems(mCatsName, new DialogInterface.OnClickListener() {
                     @Override
@@ -74,10 +74,6 @@ public class Sensors extends Fragment  {
         ppm = rootView.findViewById(R.id.ppm);
         return rootView;
     }
-
-
-
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
