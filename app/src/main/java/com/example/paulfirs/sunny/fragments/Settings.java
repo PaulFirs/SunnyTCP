@@ -9,10 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.example.paulfirs.sunny.ConnectedThread;
 import com.example.paulfirs.sunny.R;
 
 import static com.example.paulfirs.sunny.WorkActivity.APP_PREFERENCES_IP;
 import static com.example.paulfirs.sunny.WorkActivity.APP_PREFERENCES_PORT;
+import static com.example.paulfirs.sunny.WorkActivity.MyThread;
 import static com.example.paulfirs.sunny.WorkActivity.mSettings;
 
 
@@ -71,11 +73,6 @@ public class Settings extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "Settings onPause");
-        // Запоминаем данные
-        SharedPreferences.Editor editor = mSettings.edit();
-        editor.putString(APP_PREFERENCES_IP, ip_ET.getText().toString());
-        editor.putString(APP_PREFERENCES_PORT, port_ET.getText().toString());
-        editor.apply();
     }
 
     @Override
@@ -93,6 +90,23 @@ public class Settings extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Settings onDestroy");
+        // Запоминаем данные
+        SharedPreferences.Editor editor = mSettings.edit();
+        String ip = ip_ET.getText().toString();
+        String port = port_ET.getText().toString();
+        editor.putString(APP_PREFERENCES_IP, ip);
+        editor.putString(APP_PREFERENCES_PORT, port);
+        editor.apply();
+
+        if(MyThread == null){
+            MyThread = new ConnectedThread(ip, port);
+            MyThread.start();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -100,6 +114,4 @@ public class Settings extends Fragment {
         super.onDetach();
         Log.d(TAG, "Settings onDetach");
     }
-
-
 }

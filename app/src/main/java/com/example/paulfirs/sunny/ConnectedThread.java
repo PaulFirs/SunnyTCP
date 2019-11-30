@@ -1,10 +1,6 @@
 package com.example.paulfirs.sunny;
 
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.Looper;
 import android.util.Log;
 
 import com.example.paulfirs.sunny.fragments.For_Fragments;
@@ -13,12 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.WorkActivity.PERIODIC_COMMAND;
-import static com.example.paulfirs.sunny.WorkActivity.getAppContext;
 import static com.example.paulfirs.sunny.fragments.For_Fragments.byteArrayToHex;
 
 public class ConnectedThread extends Thread {
@@ -35,7 +29,7 @@ public class ConnectedThread extends Thread {
     private boolean mRun = false;
     // used to send messages
 
-    ConnectedThread(String ip, String port) {
+    public ConnectedThread(String ip, String port) {
         this.ip = ip;
         this.port = Integer.parseInt(port);
     }

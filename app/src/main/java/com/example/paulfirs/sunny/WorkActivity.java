@@ -115,10 +115,6 @@ public class WorkActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        CreateFragment(Main.class);
-        navigationView.setCheckedItem(R.id.nav_monitor);
-        setTitle(getString(R.string.nav_Monitor));
-
 
 
         String ip = "";
@@ -135,9 +131,21 @@ public class WorkActivity extends AppCompatActivity
             port = mSettings.getString(APP_PREFERENCES_PORT, "");
             // Выводим на экран данные из настроек
         }
-        MyThread = new ConnectedThread(ip, port);
-        MyThread.start();
 
+        if(!ip.isEmpty() || !port.isEmpty()) {
+            MyThread = new ConnectedThread(ip, port);
+            MyThread.start();
+
+            CreateFragment(Main.class);
+            navigationView.setCheckedItem(R.id.nav_monitor);
+            setTitle(getString(R.string.nav_Monitor));
+
+        }
+        else{
+            CreateFragment(Settings.class);
+            navigationView.setCheckedItem(R.id.nav_settings);
+            setTitle(getString(R.string.nav_Settings));
+        }
 
         h = new Handler() {
             public void handleMessage(android.os.Message msg) {

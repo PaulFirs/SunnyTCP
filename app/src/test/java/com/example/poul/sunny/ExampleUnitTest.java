@@ -1,4 +1,4 @@
-package com.example.poul.jarvis_friday;
+package com.example.poul.sunny;
 
 import org.junit.Test;
 
