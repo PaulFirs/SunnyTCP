@@ -30,6 +30,9 @@ public class ConnectedThread extends Thread {
     // used to send messages
 
     public ConnectedThread(String ip, String port) {
+        setIP_setPORT(ip, port);
+    }
+    public void setIP_setPORT(String ip, String port) {
         this.ip = ip;
         this.port = Integer.parseInt(port);
     }
@@ -72,7 +75,8 @@ public class ConnectedThread extends Thread {
     public void stopClient() {
         mRun = false;
         try {
-            socket.close();
+            if(socket != null)
+                socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,6 +140,11 @@ public class ConnectedThread extends Thread {
 
             } catch (IOException e) {
                 Log.d(TAG, e.toString());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException en) {
+                    en.printStackTrace();
+                }
             }
         }
     }

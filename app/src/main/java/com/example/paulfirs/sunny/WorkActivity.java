@@ -35,18 +35,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.example.paulfirs.sunny.ConnectedThread.socket;
+import static com.example.paulfirs.sunny.fragments.Settings.APP_PREFERENCES_IP;
+import static com.example.paulfirs.sunny.fragments.Settings.APP_PREFERENCES_PORT;
+import static com.example.paulfirs.sunny.fragments.Settings.getSettings;
+import static com.example.paulfirs.sunny.fragments.Settings.initSettings;
 
 public class WorkActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private final static String TAG = "myLogs";
 
-//Настройки программы
-
-
-    public static final String APP_PREFERENCES = "mysettings";// имя файла настроек
-    public static final String APP_PREFERENCES_IP = "ip"; // название настройки
-    public static final String APP_PREFERENCES_PORT= "port"; // название настройки
-    public static SharedPreferences mSettings;//переменная для работы с файлом настройки
 
 
     public final static byte BUF_SIZE 		= 9;
@@ -115,22 +112,10 @@ public class WorkActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-
-        String ip = "";
-        String port = "";
 //инициализация переменной для работы с настройками программы
-        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-        if (mSettings.contains(APP_PREFERENCES_IP)) {
-            // Получаем число из настроек
-            ip = mSettings.getString(APP_PREFERENCES_IP, "");
-            // Выводим на экран данные из настроек
-        }
-        if (mSettings.contains(APP_PREFERENCES_PORT)) {
-            // Получаем число из настроек
-            port = mSettings.getString(APP_PREFERENCES_PORT, "");
-            // Выводим на экран данные из настроек
-        }
+        initSettings();
+        String ip = getSettings(APP_PREFERENCES_IP);
+        String port = getSettings(APP_PREFERENCES_PORT);
 
         if(!ip.isEmpty() || !port.isEmpty()) {
             MyThread = new ConnectedThread(ip, port);
