@@ -2,15 +2,17 @@ package com.example.paulfirs.sunny;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -39,14 +41,16 @@ import static com.example.paulfirs.sunny.fragments.Settings.APP_PREFERENCES_IP;
 import static com.example.paulfirs.sunny.fragments.Settings.APP_PREFERENCES_PORT;
 import static com.example.paulfirs.sunny.fragments.Settings.getSettings;
 import static com.example.paulfirs.sunny.fragments.Settings.initSettings;
+import static java.security.AccessController.getContext;
 
 public class WorkActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
     private final static String TAG = "myLogs";
 
 
 
     public final static byte BUF_SIZE 		= 9;
+    static byte[] reTX_data;
     //Список отправляемых команд
 
     //public final static byte CHECK_CONNECT		= 0x00;
@@ -76,12 +80,13 @@ public class WorkActivity extends AppCompatActivity
     public final static byte NOT_FULL_DATA_PHONE        = 0x41;
 
 
-    static Handler h;
+    static Handler hendlerRXdata;
+    static Handler handlerShow;
 
-    private static Context context;
+    public static Context context;
 
     public static ConnectedThread MyThread = null;
-
+    SwipeRefreshLayout mSwipeRefreshLayout;//индикация подключения
 
     @SuppressLint("HandlerLeak")
     @Override
@@ -90,7 +95,6 @@ public class WorkActivity extends AppCompatActivity
         setContentView(R.layout.scrl_panel);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         if (!isMyServiceRunning(ServiceConnect.class)) {
             Log.d(TAG, "Запуск сервиса из активности");
@@ -109,8 +113,38 @@ public class WorkActivity extends AppCompatActivity
         context = getApplicationContext();
 
         //Это scrl_panel
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //индикация подключения
+        //индикация подключения
+        mSwipeRefreshLayout = findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        handlerShow = new Handler() {
+            @Override
+            public void handleMessage(android.os.Message msg) {
+
+                switch (msg.what){
+                    case(0):
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        break;
+                    case(1):
+                        mSwipeRefreshLayout.setRefreshing(true);
+                        break;
+
+                }
+//                ProgressDialog progressDialog = new ProgressDialog(WorkActivity.this, R.style.MyTheme);
+//                progressDialog.setCancelable(false);
+//                progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+                //progressDialog.show();
+
+            }
+        };
 
 //инициализация переменной для работы с настройками программы
         initSettings();
@@ -120,6 +154,7 @@ public class WorkActivity extends AppCompatActivity
         if(!ip.isEmpty() || !port.isEmpty()) {
             MyThread = new ConnectedThread(ip, port);
             MyThread.start();
+
 
             CreateFragment(Main.class);
             navigationView.setCheckedItem(R.id.nav_monitor);
@@ -132,7 +167,10 @@ public class WorkActivity extends AppCompatActivity
             setTitle(getString(R.string.nav_Settings));
         }
 
-        h = new Handler() {
+
+
+
+        hendlerRXdata = new Handler() {
             public void handleMessage(android.os.Message msg) {
 
                 byte[] rx_data = (byte[]) msg.obj;		//массив принятых данных
@@ -308,7 +346,7 @@ public class WorkActivity extends AppCompatActivity
 
     public static void txByte(byte[] tx_data){
         tx_data[0] = For_Fragments.CRC8(tx_data);
-
+        reTX_data = tx_data;
         try {
             if(socket.isConnected()) {
                 MyThread.sendMessage(tx_data);
@@ -340,5 +378,12 @@ public class WorkActivity extends AppCompatActivity
 
     public static void showToast(String str){
         Toast.makeText(getAppContext(), str, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRefresh() {
+        txByte(reTX_data);
+        //MyThread.stopClient();
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 }

@@ -13,6 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.example.paulfirs.sunny.WorkActivity.PERIODIC_COMMAND;
+import static com.example.paulfirs.sunny.WorkActivity.handlerShow;
 import static com.example.paulfirs.sunny.fragments.For_Fragments.byteArrayToHex;
 
 public class ConnectedThread extends Thread {
@@ -32,6 +33,7 @@ public class ConnectedThread extends Thread {
     public ConnectedThread(String ip, String port) {
         setIP_setPORT(ip, port);
     }
+
     public void setIP_setPORT(String ip, String port) {
         this.ip = ip;
         this.port = Integer.parseInt(port);
@@ -94,12 +96,10 @@ public class ConnectedThread extends Thread {
 
 
                 Log.d(TAG, "Подключение...");
-                socket = new Socket(InetAddress.getByName(ip), port);
 
-//                ProgressDialog progressDialog = new ProgressDialog(getAppContext(), R.style.MyTheme);
-//                progressDialog.setCancelable(false);
-//                progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-//                progressDialog.show();
+                handlerShow.sendEmptyMessage(1);
+                socket = new Socket(InetAddress.getByName(ip), port);
+                handlerShow.sendEmptyMessage(0);
 
                 Log.d(TAG, "Подключено");
 
@@ -124,7 +124,7 @@ public class ConnectedThread extends Thread {
                             }
                             setTimerResp();
 
-                            WorkActivity.h.obtainMessage(1, readBytes, -1, buf).sendToTarget(); /* Отправляем в очередь сообщенийHandler*/
+                            WorkActivity.hendlerRXdata.obtainMessage(1, readBytes, -1, buf).sendToTarget(); /* Отправляем в очередь сообщенийHandler*/
                         }
                     }
 
@@ -132,6 +132,8 @@ public class ConnectedThread extends Thread {
                     Log.d(TAG, e.toString());
                     Log.e("TCP", "S: Error", e);
                 } finally {
+
+                    handlerShow.sendEmptyMessage(1);
                     //the socket must be closed. It is not possible to reconnect to this socket
                     // after it is closed, which means a new socket instance has to be created.
                     if (mRun)
@@ -139,16 +141,11 @@ public class ConnectedThread extends Thread {
                 }
 
             } catch (IOException e) {
+                handlerShow.sendEmptyMessage(1);
                 Log.d(TAG, e.toString());
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException en) {
-                    en.printStackTrace();
-                }
             }
         }
     }
-
 
     void setTimerResp(){
         timerResp = new Timer();//таймер ответного сообщения.
@@ -163,6 +160,7 @@ public class ConnectedThread extends Thread {
             }
         }, 15000);
     }
+
     void stopTimerResp(){
         if (timerResp != null) {//сброс таймера по ответу
             timerResp.cancel();
